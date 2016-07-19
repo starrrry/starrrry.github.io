@@ -4,7 +4,7 @@
   <title><![CDATA[starrrry]]></title>
   <link href="starrrry.github.io/atom.xml" rel="self"/>
   <link href="starrrry.github.io/"/>
-  <updated>2016-07-19T10:03:04+08:00</updated>
+  <updated>2016-07-19T10:10:19+08:00</updated>
   <id>starrrry.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -36,9 +36,10 @@
 @property (nonatomic, assign, readonly) ptrdiff_t offset;       ///&lt; Ivar&#39;s offset
 @property (nonatomic, strong, readonly) NSString *typeEncoding; ///&lt; Ivar&#39;s type encoding
 @property (nonatomic, assign, readonly) YYEncodingType type;    ///&lt; Ivar&#39;s type
+@end
 </code></pre>
 
-<h3 id="toc_2">Ivar ivar</h3>
+<h3 id="toc_2">Ivar</h3>
 
 <p>Ivar是表示实例变量的类型，其实际是一个指向objc_ivar结构体的指针</p>
 
@@ -75,21 +76,409 @@ struct objc_ivar {
 <img src="media/14683222736437/2014031604.png" alt="2014031604"/><br/>
 使用Non Fragile ivars时，Runtime会进行检测来调整类中新增的ivar的偏移量。 这样我们就可以通过<code>对象地址 ＋ 基类大小 + ivar偏移字节</code>的方法来计算出ivar相应的地址，并访问到相应的ivar。</p>
 
-<h3 id="toc_3">ptrdiff_t offset</h3>
+<h3 id="toc_3">ptrdiff_t</h3>
 
 <p><code>ptrdiff_t</code>是C/C++标准库中定义的一个与机器相关的数据类型，通常用来保存两个指针减法操作的结果。<code>offset</code>即基地址偏移字节。</p>
+
+<h3 id="toc_4"><code>- (instancetype)initWithIvar:(Ivar)ivar；</code></h3>
+
+<p>使用属性进行初始化，其中用到的<code>ivar_getName</code>、<code>ivar_getOffset</code>、<code>ivar_getTypeEncoding</code>等是获取上文中<code>objc_ivar</code>中内容的方法。</p>
+
+<h2 id="toc_5">YYClassMethodInfo</h2>
+
+<pre><code class="language-objc">@interface YYClassMethodInfo : NSObject
+@property (nonatomic, assign, readonly) Method method;                  ///&lt; method opaque struct
+@property (nonatomic, strong, readonly) NSString *name;                 ///&lt; method name
+@property (nonatomic, assign, readonly) SEL sel;                        ///&lt; method&#39;s selector
+@property (nonatomic, assign, readonly) IMP imp;                        ///&lt; method&#39;s implementation
+@property (nonatomic, strong, readonly) NSString *typeEncoding;         ///&lt; method&#39;s parameter and return types
+@property (nonatomic, strong, readonly) NSString *returnTypeEncoding;   ///&lt; return value&#39;s type
+@property (nullable, nonatomic, strong, readonly) NSArray&lt;NSString *&gt; *argumentTypeEncodings; ///&lt; array of 
+@end
+</code></pre>
+
+<h3 id="toc_6">Method</h3>
+
+<p>与上文中的<code>Ivar</code>类似，都可以在<code>runtime.h</code>文件中找到定义</p>
+
+<h3 id="toc_7">SEL与IMP</h3>
+
+<p>SEL又叫选择器，是表示一个方法的selector的指针，其定义如下：</p>
+
+<pre><code class="language-objc">typedef struct objc_selector *SEL;
+</code></pre>
+
+<p>方法的selector用于表示运行时方法的名字。Objective-C在编译时，会依据每一个方法的名字、参数序列，生成一个唯一的整型标识(Int类型的地址)，这个标识就是SEL。</p>
+
+<p>IMP实际上是一个函数指针，指向方法实现的首地址。其定义如下：</p>
+
+<pre><code class="language-objc">id (*IMP)(id, SEL, ...)
+</code></pre>
+
+<p>这个函数使用当前CPU架构实现的标准的C调用约定。第一个参数是指向self的指针(如果是实例方法，则是类实例的内存地址；如果是类方法，则是指向元类的指针)，第二个参数是方法选择器(selector)，接下来是方法的实际参数列表。<br/>
+前面介绍过的SEL就是为了查找方法的最终实现IMP的。由于每个方法对应唯一的SEL，因此我们可以通过SEL方便快速准确地获得它所对应的IMP，查找过程将在下面讨论。取得IMP后，我们就获得了执行这个方法代码的入口点，此时，我们就可以像调用普通的C语言函数一样来使用这个函数指针了。<br/>
+更详细的解释可以找<code>runtime</code>相关的内容。</p>
+
+<h2 id="toc_8">YYClassPropertyInfo</h2>
+
+<p>先看一个demo：</p>
+
+<pre><code class="language-objc">@interface ViewController ()
+
+@property (nonatomic, copy) NSString *string;
+
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    //string
+    NSLog(@&quot;--------string--------&quot;);
+    self.string = @&quot;test!&quot;;
+    char *name = &quot;string&quot;;
+    objc_property_t property = class_getProperty(self.class, name);
+    unsigned int attrCount;
+    objc_property_attribute_t *attr = property_copyAttributeList(property, &amp;attrCount);
+    for (unsigned int i = 0; i &lt; attrCount; i++) {
+        NSLog(@&quot;name:%s,value:%s&quot;,attr[i].name,attr[i].value);
+    }
+    //number
+    NSLog(@&quot;--------number--------&quot;);
+    self.number = 42;
+    name = &quot;number&quot;;
+    property = class_getProperty(self.class, name);
+    attr = property_copyAttributeList(property, &amp;attrCount);
+    for (unsigned int i = 0; i &lt; attrCount; i++) {
+        NSLog(@&quot;name:%s,value:%s&quot;,attr[i].name,attr[i].value);
+    }
+}
+
+@end
+</code></pre>
+
+<p>我定义了一个名为<code>string</code>的<code>NSString</code>属性，特质为<code>nonatomic</code>和<code>copy</code>。<br/>
+运行后得到结果为：</p>
+
+<pre><code class="language-shell">2016-07-19 12:44:39.170 demo4[58588:11595102] --------string--------
+2016-07-19 12:44:39.170 demo4[58588:11595102] name:T,value:@&quot;NSString&quot;
+2016-07-19 12:44:39.170 demo4[58588:11595102] name:C,value:
+2016-07-19 12:44:39.170 demo4[58588:11595102] name:N,value:
+2016-07-19 12:44:39.171 demo4[58588:11595102] name:V,value:_string
+2016-07-19 12:44:39.171 demo4[58588:11595102] --------number--------
+2016-07-19 12:44:39.171 demo4[58588:11595102] name:T,value:i
+2016-07-19 12:44:39.171 demo4[58588:11595102] name:N,value:
+2016-07-19 12:44:39.171 demo4[58588:11595102] name:V,value:_number
+</code></pre>
+
+<p>然后再看<code>- (instancetype)initWithProperty:(objc_property_t)property</code>方法中的这一段:</p>
+
+<pre><code class="language-objc">for (unsigned int i = 0; i &lt; attrCount; i++) {
+        switch (attrs[i].name[0]) {
+            case &#39;T&#39;: { // Type encoding
+                if (attrs[i].value) {
+                    _typeEncoding = [NSString stringWithUTF8String:attrs[i].value];
+                    type = YYEncodingGetType(attrs[i].value);
+                    
+                    //typeEncoding长度不为0且这个属性是对象类型的
+                    if ((type &amp; YYEncodingTypeMask) == YYEncodingTypeObject &amp;&amp; _typeEncoding.length) {
+                        NSScanner *scanner = [NSScanner scannerWithString:_typeEncoding];
+                        //判断_typeEncoding字符串是否是以 @&quot; 开头的，如果是则继续执行，不是则跳出if
+                        //此时扫描点为0
+                        if (![scanner scanString:@&quot;@\&quot;&quot; intoString:NULL]) continue;
+                        
+                        NSString *clsName = nil;
+                        //扫描_typeEncoding字符串直到遇到  &quot;&lt;  时停止，将这段字符串赋值到claName中，即得到 @&quot;&quot; 的双引号中的内容
+                        //此时扫描点为2
+                        if ([scanner scanUpToCharactersFromSet: [NSCharacterSet characterSetWithCharactersInString:@&quot;\&quot;&lt;&quot;]
+                                                    intoString: &amp;clsName]) {
+                            //如果这个是对象属性则存在，不是则为nil
+                            if (clsName.length) _cls = objc_getClass(clsName.UTF8String);
+                        }
+                        
+                        NSMutableArray *protocols = nil;
+                        //扫描到 &lt; 时停止
+                        while ([scanner scanString:@&quot;&lt;&quot; intoString:NULL]) {
+                            NSString* protocol = nil;
+                            //扫描到 &gt; 时停止，将 &lt;&gt; 的内容赋值到protocol中
+                            if ([scanner scanUpToString:@&quot;&gt;&quot; intoString: &amp;protocol]) {
+                                if (protocol.length) {
+                                    if (!protocols) protocols = [NSMutableArray new];
+                                    [protocols addObject:protocol];
+                                }
+                            }
+                            [scanner scanString:@&quot;&gt;&quot; intoString:NULL];
+                        }
+                        //获得这个对象属性的类所遵从的协议，不是对象则为空，是对象也可能为空
+                        _protocols = protocols;
+                    }
+                }
+            } break;
+            case &#39;V&#39;: { // Instance variable，实例变量
+                if (attrs[i].value) {
+                        //获取实例变量的名字
+                    _ivarName = [NSString stringWithUTF8String:attrs[i].value];
+                }
+            } break;
+            case &#39;R&#39;: {
+                type |= YYEncodingTypePropertyReadonly;
+            } break;
+            case &#39;C&#39;: {
+                type |= YYEncodingTypePropertyCopy;
+            } break;
+            case &#39;&amp;&#39;: {
+                type |= YYEncodingTypePropertyRetain;
+            } break;
+            case &#39;N&#39;: {
+                type |= YYEncodingTypePropertyNonatomic;
+            } break;
+            case &#39;D&#39;: {
+                type |= YYEncodingTypePropertyDynamic;
+            } break;
+            case &#39;W&#39;: {
+                type |= YYEncodingTypePropertyWeak;
+            } break;
+            case &#39;G&#39;: {
+                type |= YYEncodingTypePropertyCustomGetter;
+                if (attrs[i].value) {
+                    _getter = NSSelectorFromString([NSString stringWithUTF8String:attrs[i].value]);
+                }
+            } break;
+            case &#39;S&#39;: {
+                type |= YYEncodingTypePropertyCustomSetter;
+                if (attrs[i].value) {
+                    _setter = NSSelectorFromString([NSString stringWithUTF8String:attrs[i].value]);
+                }
+            } // break; commented for code coverage in next line
+            default: break;
+        }
+    }
+
+</code></pre>
+
+<p>通过demo和下面初始化方法中的注释，我们可以知道<code>T</code>代表了这个属性的类型，<code>V</code>代表属性的实例变量，由此得到这个属性的相关信息。</p>
+
+<h2 id="toc_9">YYClassInfo</h2>
+
+<p>//OC2.0上的配图<br/>
+使用以下方法进行<code>YYClassInfo</code>的初始化：</p>
+
+<pre><code class="language-objc">+ (instancetype)classInfoWithClass:(Class)cls {
+    if (!cls) return nil;
+    static CFMutableDictionaryRef classCache;
+    static CFMutableDictionaryRef metaCache;
+    static dispatch_once_t onceToken;
+    static dispatch_semaphore_t lock;//信号量lock
+    dispatch_once(&amp;onceToken, ^{
+        classCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &amp;kCFTypeDictionaryKeyCallBacks, &amp;kCFTypeDictionaryValueCallBacks);
+        metaCache = CFDictionaryCreateMutable(CFAllocatorGetDefault(), 0, &amp;kCFTypeDictionaryKeyCallBacks, &amp;kCFTypeDictionaryValueCallBacks);
+        lock = dispatch_semaphore_create(1);//设置信号量为1
+    });
+    dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);//如果信号量的值大于0，该函数所处线程就继续执行下面的语句，并且将信号量的值减1；如果信号量的值为0，那么这个函数就阻塞当前线程等待timeout
+    YYClassInfo *info = CFDictionaryGetValue(class_isMetaClass(cls) ? metaCache : classCache, (__bridge const void *)(cls));
+    if (info &amp;&amp; info-&gt;_needUpdate) {
+        [info _update];
+    }
+    dispatch_semaphore_signal(lock);//当返回值为0时表示当前并没有线程等待其处理的信号量，其处理的信号量的值加1即可。当返回值不为0时，表示其当前有（一个或多个）线程等待其处理的信号量，并且该函数唤醒了一个等待的线程
+    //如果info不存在，初始化
+    if (!info) {
+        info = [[YYClassInfo alloc] initWithClass:cls];
+        if (info) {
+            dispatch_semaphore_wait(lock, DISPATCH_TIME_FOREVER);
+            CFDictionarySetValue(info.isMeta ? metaCache : classCache, (__bridge const void *)(cls), (__bridge const void *)(info));
+            dispatch_semaphore_signal(lock);
+        }
+    }
+    return info;
+}
+</code></pre>
+
+<p>这里可以看到<code>dispatch_semaphore_wait</code>和<code>dispatch_semaphore_signal</code>是成对出现的，确保程序的同步执行。信号量的知识可以查看操作系统中信号量相关的内容。<br/>
+在这里通过<code>_update</code>方法获取这个类中的方法列表，属性列表和实例变量列表信息。</p>
+
+<pre><code class="language-objc">- (void)_update {
+    _ivarInfos = nil;
+    _methodInfos = nil;
+    _propertyInfos = nil;
+    
+    Class cls = self.cls;
+    unsigned int methodCount = 0;
+    //获取类的实例方法列表，不包括其superclasses实现的方法
+    Method *methods = class_copyMethodList(cls, &amp;methodCount);
+    if (methods) {
+        NSMutableDictionary *methodInfos = [NSMutableDictionary new];
+        _methodInfos = methodInfos;
+        for (unsigned int i = 0; i &lt; methodCount; i++) {
+            YYClassMethodInfo *info = [[YYClassMethodInfo alloc] initWithMethod:methods[i]];
+            //以method的name为键存储method信息
+            if (info.name) methodInfos[info.name] = info;
+        }
+        free(methods);
+    }
+    unsigned int propertyCount = 0;
+    //获取类的PropertyList
+    objc_property_t *properties = class_copyPropertyList(cls, &amp;propertyCount);
+    if (properties) {
+        NSMutableDictionary *propertyInfos = [NSMutableDictionary new];
+        _propertyInfos = propertyInfos;
+        for (unsigned int i = 0; i &lt; propertyCount; i++) {
+            YYClassPropertyInfo *info = [[YYClassPropertyInfo alloc] initWithProperty:properties[i]];
+            //以property的name为键存储property信息
+            if (info.name) propertyInfos[info.name] = info;
+        }
+        free(properties);
+    }
+    
+    unsigned int ivarCount = 0;
+    //获取类的实例变量列表
+    Ivar *ivars = class_copyIvarList(cls, &amp;ivarCount);
+    if (ivars) {
+        NSMutableDictionary *ivarInfos = [NSMutableDictionary new];
+        _ivarInfos = ivarInfos;
+        for (unsigned int i = 0; i &lt; ivarCount; i++) {
+            YYClassIvarInfo *info = [[YYClassIvarInfo alloc] initWithIvar:ivars[i]];
+            //以实例变量的name为键存储信息
+            if (info.name) ivarInfos[info.name] = info;
+        }
+        free(ivars);
+    }
+    
+    if (!_ivarInfos) _ivarInfos = @{};
+    if (!_methodInfos) _methodInfos = @{};
+    if (!_propertyInfos) _propertyInfos = @{};
+    
+    _needUpdate = NO;
+}
+</code></pre>
+
+<h2 id="toc_10">参考</h2>
+
+<ol>
+<li><a href="http://southpeak.github.io/blog/2014/10/30/objective-c-runtime-yun-xing-shi-zhi-er-:cheng-yuan-bian-liang-yu-shu-xing/">关于成员变量和属性</a></li>
+<li><a href="http://chun.tips/blog/2014/11/08/bao-gen-wen-di-objective%5Bnil%5Dc-runtime(4)%5Bnil%5D-cheng-yuan-bian-liang-yu-shu-xing/">ivar的偏移量问题</a></li>
+<li><a href="http://southpeak.github.io/blog/2014/11/03/objective-c-runtime-yun-xing-shi-zhi-san-:fang-fa-yu-xiao-xi-zhuan-fa/">关于SEL和IMP</a></li>
+</ol>
 
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[引用]]></title>
-    <link href="starrrry.github.io/14683222625946.html"/>
-    <updated>2016-07-12T19:17:42+08:00</updated>
-    <id>starrrry.github.io/14683222625946.html</id>
+    <title type="html"><![CDATA[图像与视频编码]]></title>
+    <link href="starrrry.github.io/14688942051696.html"/>
+    <updated>2016-07-19T10:10:05+08:00</updated>
+    <id>starrrry.github.io/14688942051696.html</id>
     <content type="html"><![CDATA[
-<p><a href="http://southpeak.github.io/blog/2014/10/30/objective-c-runtime-yun-xing-shi-zhi-er-:cheng-yuan-bian-liang-yu-shu-xing/">http://southpeak.github.io/blog/2014/10/30/objective-c-runtime-yun-xing-shi-zhi-er-:cheng-yuan-bian-liang-yu-shu-xing/</a> 关于成员变量和属性<br/>
-<a href="http://chun.tips/blog/2014/11/08/bao-gen-wen-di-objective%5Bnil%5Dc-runtime(4)%5Bnil%5D-cheng-yuan-bian-liang-yu-shu-xing/">http://chun.tips/blog/2014/11/08/bao-gen-wen-di-objective[nil]c-runtime(4)[nil]-cheng-yuan-bian-liang-yu-shu-xing/</a> ivar的偏移量问题</p>
+<p>因为要做一个与视频相关的项目，以前很少具体了解图像视频相关的知识，也趁这个机会要求自己开始写博客。</p>
+
+<h2 id="toc_0">色彩模型，像素与位图</h2>
+
+<p>首先讲几个比较简单但以前自己都没有注意的概念。  </p>
+
+<h3 id="toc_1">色彩模型</h3>
+
+<p>色彩模型是描述使用一组值表示颜色方法的抽象数学模型。例如RGB（三原色光模型），CMYK（印刷四分色模型）。三原色光模型是将红（Red）、绿（Green）、蓝（Blue）三原色的色光以不同比例相加来表示颜色的一种模式，是一种加色模型。RGB的多少指亮度，三原色各有256级亮度，用0~255间的整数表示。因此当RGB的数值都为0时，亮度最低，为黑色；都为255时，亮度最大，为白色。关于色彩模型更详细的内容可以看这篇<a href="http://blog.ibireme.com/2013/08/12/color-model/" title="Title">ibireme-颜色模型</a>。</p>
+
+<h3 id="toc_2">像素</h3>
+
+<p>像素（pixel）是图像或视频显示的基本单位，这个定义也与上下文有关。当我们抽象地讨论一张图像，像素不是一个点或者一个方块，而是一个抽象的取样，如同一个二维矩阵，矩阵的每一个元素代表一个像素。如果把一张图像想象成紧密平铺在空地上的一片乒乓球，每一个乒乓球就像是一个像素。对于计算机中显示的通常讲的一张 100*100像素的彩色图像来说，它就是由10000个像素组成的，每一个像素有一组RGB值来表示这个像素的颜色。</p>
+
+<h3 id="toc_3">位图</h3>
+
+<p>而这样由像素阵列来表示的图像，就是位图（Bitmap），又称栅格图（Raster graphics）。<br/>
+位图的每个像素都分配有特定的位置与颜色信息。根据色彩深度（色彩位数），即用来表示每个像素点颜色的二进制位数，可以把图像分为1位（单色），2位（4色，CGA），4位（16色，VGA），8位（256色），16位（增强色），24位和32位（真彩色）。RGB加色模型由于每个颜色有256种取值，即24位/像素，因此用RGB模型表示颜色的位图称作24位图像。</p>
+
+<p><center><img src="http://o6yxlucxk.bkt.clouddn.com/Rgb-raster-image-hans.png" alt="MacDown Screenshot"/></center></p>
+
+<h3 id="toc_4">位图的显示</h3>
+
+<p>假如有一张100*100像素的图片显示在一个100*100像素的显示屏上，刚好一个像素信息对应屏幕上的一个像素点。而如果是显示在一个1000*1000像素的显示屏上，这张照片就不能铺满这个显示屏，只占据了一部分。我们可以拉伸这张图片，让其占据屏幕更大的部分，好像图片突然多出了一些像素。当我们在拉伸图片时，计算机会根据插值算法或其他特定算法，根据原有图片的像素信息，生成新的像素插到原来的图片中，让图片可以占据更大的面积。同样的，如果一张大分辨率图片放在一个小分辨率屏幕上时，要么只显示图片的一部分，要么删去图片一部分的像素，让图片所占面积缩小。</p>
+
+<h2 id="toc_5">图像编码与格式</h2>
+
+<p>图像编码即是对图像数据进行压缩，目的是减少图像数据中的冗余信息，从而用更高效的格式存储和传输数据。</p>
+
+<h3 id="toc_6">减少冗余信息</h3>
+
+<ul>
+<li>空间冗余：图像相邻像素之间有较强的相关性，因此可以通过编码减小数据量</li>
+<li>结构冗余：有些图像从大体看存在着非常强的纹理结构，例如草席图像。</li>
+<li>知识冗余：有许多图像的理解与某些基础知识有相当大的相关性。例如人脸的图像有固定的结构。这类规律性的结构可由先验知识和背景知识得到。</li>
+<li>视觉冗余：是由于人体器官的不敏感性造成的。某些人视觉无法感知的部分可以被压缩而不会影响感知。</li>
+<li>信息熵冗余：又可称为编码冗余，是指一组数据携带的平均信息量。</li>
+</ul>
+
+<h3 id="toc_7">图像压缩编码</h3>
+
+<p>图像压缩编码可分为两类</p>
+
+<ol>
+<li>一类压缩是可逆的，即从压缩后的数据可以 完全恢复到原来的图像，信息没有损失，称为无损压缩编码。</li>
+<li>另一类压缩是不可逆的，即从压缩后的数据无法完全恢复到原来的图像，信息有一定损失，称为有损压缩编码。</li>
+</ol>
+
+<h4 id="toc_8">常用无损压缩编码</h4>
+
+<ul>
+<li>BMP取自BitMaP的缩写，是一种与硬件设备无关的图像文件格式。它采用位映射存储格式，除了图像深度可选以外，不采用其他任何压缩。通常不适合在因特网或者其他低速或有容量限制的媒介上传输。</li>
+<li>GIF（Graphics Interchange Format）原意是“图像互换格式”。这是一种无损压缩格式，只要图像不多于256色，则可即减少文件的大小，又保持图像的质量。并且GIF可以插入多帧，从而实现动画效果。可设置透明色以产生对象浮现于背景之上的效果。但是由于采用了8为压缩，最多只能处理256种颜色，不宜应用于真彩色图片。是目前广泛应用于网络传输的图像格式之一。</li>
+<li>PNG（Portable Network Graphics）便携式网络图形，是一种无损压缩的位图图形格式。它最高支持48位真彩色图像以及16位灰度图像（每个像素只有一个采样颜色的图像），支持Alpha通道的透明/半透明特性，支持存储附加文本信息，以保留图像名称、作者、版权、创作时间、注释等信息。PNG的开发目标是改善并替换GIF作为适合网络传输的格式而不需专利许可，所以被广泛应用于互联网及其他方面上。我们在iOS开发中，icon就是使用PNG格式的图片。</li>
+</ul>
+
+<h4 id="toc_9">常用有损压缩编码</h4>
+
+<ul>
+<li>JPEG（Joint Photographic Experts Group，联合图像专家小组）是一种针对照片视频而广泛使用的有损压缩标准方法。JPEG的压缩方式通常是破坏性数据压缩，意即在压缩过程中图像的质量会遭受到可见的破坏。最普遍被使用的扩展名格式为.jpg，.jpeg等。</li>
+</ul>
+
+<h4 id="toc_10">视频压缩编码</h4>
+
+<pre><code>AVF_EXPORT NSString *const AVVideoCodecKey /* NSString (CMVideoCodecType) */                NS_AVAILABLE(10_7, 4_0);
+AVF_EXPORT NSString *const AVVideoCodecH264 /* @&quot;avc1&quot; */                               NS_AVAILABLE(10_7, 4_0);
+AVF_EXPORT NSString *const AVVideoCodecJPEG /* @&quot;jpeg&quot; */                               NS_AVAILABLE(10_7, 4_0);
+AVF_EXPORT NSString *const AVVideoCodecAppleProRes4444 /* @&quot;ap4h&quot; */                    NS_AVAILABLE(10_7, NA);
+AVF_EXPORT NSString *const AVVideoCodecAppleProRes422   /* @&quot;apcn&quot; */                   NS_AVAILABLE(10_7, NA);`
+</code></pre>
+
+<p>AVFoundation框架原生定义了这4种视频编码方式，其中主要使用的是H.264。<br/>
+H.264通过空间和时间2个维度来压缩：<br/>
+1. 空间：空间上的压缩独立于视频帧，也称为帧内压缩。主要通过压缩图片的方式来减小体积，帧内压缩一般为有损压缩。<br/>
+2. 时间：时间上的压缩也称为帧间压缩。视频是由连续的帧（图片）组成。一段视频中有很多不变的冗余元素，通过减小这些冗余元素来达到压缩目的，这就是帧间压缩，帧间压缩一般为无损压缩。</p>
+
+<p>H264有3种profile，用来确定编码过程中帧间压缩使用的算法：</p>
+
+<pre><code>AVF_EXPORT NSString *const AVVideoAllowFrameReorderingKey /* NSNumber (BOOL) */                          NS_AVAILABLE(10_10, 7_0);
+
+AVF_EXPORT NSString *const AVVideoProfileLevelKey /* NSString, H.264 only, one of: */                    NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Baseline30 /* Baseline Profile Level 3.0 */        NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Baseline31 /* Baseline Profile Level 3.1 */        NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Baseline41 /* Baseline Profile Level 4.1 */        NS_AVAILABLE(10_8, 5_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264BaselineAutoLevel /* Baseline Profile Auto Level */ NS_AVAILABLE(10_9, 7_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main30 /* Main Profile Level 3.0 */                NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main31 /* Main Profile Level 3.1 */                NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main32 /* Main Profile Level 3.2 */                NS_AVAILABLE(10_8, 5_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main41 /* Main Profile Level 4.1 */                NS_AVAILABLE(10_8, 5_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264MainAutoLevel /* Main Profile Auto Level */        NS_AVAILABLE(10_9, 7_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264High40 /* High Profile Level 4.0 */                NS_AVAILABLE(10_9, 6_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264High41 /* High Profile Level 4.1 */                NS_AVAILABLE(10_9, 6_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264HighAutoLevel /* High Profile Auto Level */        NS_AVAILABLE(10_9, 7_0);
+</code></pre>
+
+<ol>
+<li>BaseLine：这个标准提供了最低效的压缩，经过这个标准压缩后的文件体积仍然比较大，但是这种算法计算强度最小。</li>
+<li>Main：这个标准的计算强度比BaseLine大，但能达到更高的压缩效果。</li>
+<li>High：这个标准能达到最高质量的压缩效果，但他的压缩算法最复杂。
+对应于<code>AVVideoProfileLevelKey</code>，每种profile的level越高，视频的码率、分辨率、fps越高。</li>
+</ol>
+
+<h2 id="toc_11">参考阅读</h2>
+
+<ul>
+<li><a href="https://zh.wikipedia.org/wiki/%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93">色彩空間</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%B8%89%E5%8E%9F%E8%89%B2%E5%85%89%E6%A8%A1%E5%BC%8F">三原色光模式</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E5%83%8F%E7%B4%A0">像素</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%BD%8D%E5%9B%BE">位图</a></li>
+<li><a href="http://wiki.mbalib.com/wiki/%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99">数据冗余</a></li>
+</ul>
 
 ]]></content>
   </entry>
