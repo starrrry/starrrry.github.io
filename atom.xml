@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[starrrry]]></title>
+  <link href="starrrry.github.io/atom.xml" rel="self"/>
+  <link href="starrrry.github.io/"/>
+  <updated>2016-07-19T10:03:04+08:00</updated>
+  <id>starrrry.github.io/</id>
+  <author>
+    <name><![CDATA[]]></name>
+    
+  </author>
+  <generator uri="http://www.mweb.im">MWeb</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[YYModel笔记<一>]]></title>
+    <link href="starrrry.github.io/14683222736437.html"/>
+    <updated>2016-07-12T19:17:53+08:00</updated>
+    <id>starrrry.github.io/14683222736437.html</id>
+    <content type="html"><![CDATA[
+<h2 id="toc_0">YYEncodingGetType</h2>
+
+<pre><code class="language-objc">YYEncodingType YYEncodingGetType(const char *typeEncoding);
+</code></pre>
+
+<p>这是一个C方法，我在Github上问了作者，这里使用C语言的原因是执行速度更快</p>
+
+<h2 id="toc_1">YYClassIvarInfo</h2>
+
+<p>看<code>YYClassIvarInfo</code>这个类，它包含了一个实例变量的多个信息</p>
+
+<pre><code class="language-objc">@interface YYClassIvarInfo : NSObject
+@property (nonatomic, assign, readonly) Ivar ivar;              ///&lt; ivar opaque struct 
+@property (nonatomic, strong, readonly) NSString *name;         ///&lt; Ivar&#39;s name
+@property (nonatomic, assign, readonly) ptrdiff_t offset;       ///&lt; Ivar&#39;s offset
+@property (nonatomic, strong, readonly) NSString *typeEncoding; ///&lt; Ivar&#39;s type encoding
+@property (nonatomic, assign, readonly) YYEncodingType type;    ///&lt; Ivar&#39;s type
+</code></pre>
+
+<h3 id="toc_2">Ivar ivar</h3>
+
+<p>Ivar是表示实例变量的类型，其实际是一个指向objc_ivar结构体的指针</p>
+
+<pre><code class="language-objc">typedef struct objc_ivar *Ivar;
+</code></pre>
+
+<p>其定义如下：</p>
+
+<pre><code class="language-objc">typedef struct objc_ivar *Ivar;
+
+struct objc_ivar {
+
+    char *ivar_name                 OBJC2_UNAVAILABLE;  // 变量名
+
+    char *ivar_type                 OBJC2_UNAVAILABLE;  // 变量类型
+
+    int ivar_offset                 OBJC2_UNAVAILABLE;  // 基地址偏移字节
+
+#ifdef __LP64__
+
+    int space                       OBJC2_UNAVAILABLE;
+
+#endif
+
+} 
+</code></pre>
+
+<p><code>ivar_offset</code>表示基地址偏移字节。在编译我们的类时，编译器生成了一个ivar布局，显示了在类中从哪可以访问我们的 ivars 。看下图:<br/>
+<img src="media/14683222736437/2014031602.png" alt="2014031602"/><br/>
+上图中，左侧的数据就是地址偏移字节，我们对 ivar 的访问就可以通过<code>对象地址 ＋ ivar偏移字节</code>的方法。但是这又引发一个问题，看下图:<br/>
+<img src="media/14683222736437/2014031603.png" alt="2014031603"/><br/>
+我们增加了父类的ivar，这个时候布局就出错了，我们就不得不重新编译子类来恢复兼容性。<br/>
+而Objective－C Runtime中使用了Non Fragile ivars，看下图:<br/>
+<img src="media/14683222736437/2014031604.png" alt="2014031604"/><br/>
+使用Non Fragile ivars时，Runtime会进行检测来调整类中新增的ivar的偏移量。 这样我们就可以通过<code>对象地址 ＋ 基类大小 + ivar偏移字节</code>的方法来计算出ivar相应的地址，并访问到相应的ivar。</p>
+
+<h3 id="toc_3">ptrdiff_t offset</h3>
+
+<p><code>ptrdiff_t</code>是C/C++标准库中定义的一个与机器相关的数据类型，通常用来保存两个指针减法操作的结果。<code>offset</code>即基地址偏移字节。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[引用]]></title>
+    <link href="starrrry.github.io/14683222625946.html"/>
+    <updated>2016-07-12T19:17:42+08:00</updated>
+    <id>starrrry.github.io/14683222625946.html</id>
+    <content type="html"><![CDATA[
+<p><a href="http://southpeak.github.io/blog/2014/10/30/objective-c-runtime-yun-xing-shi-zhi-er-:cheng-yuan-bian-liang-yu-shu-xing/">http://southpeak.github.io/blog/2014/10/30/objective-c-runtime-yun-xing-shi-zhi-er-:cheng-yuan-bian-liang-yu-shu-xing/</a> 关于成员变量和属性<br/>
+<a href="http://chun.tips/blog/2014/11/08/bao-gen-wen-di-objective%5Bnil%5Dc-runtime(4)%5Bnil%5D-cheng-yuan-bian-liang-yu-shu-xing/">http://chun.tips/blog/2014/11/08/bao-gen-wen-di-objective[nil]c-runtime(4)[nil]-cheng-yuan-bian-liang-yu-shu-xing/</a> ivar的偏移量问题</p>
+
+]]></content>
+  </entry>
+  
+</feed>

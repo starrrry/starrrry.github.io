@@ -1,0 +1,196 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  YYModel笔记 - starrrry
+  
+  </title>
+ <meta name="description" content="starrrry">
+ <link href="atom.xml" rel="alternate" title="starrrry" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+    <script src="asset/highlightjs/highlight.pack.js"></script>
+    <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+<div id="header">
+    <h1><a href="index.html">starrrry</a></h1>
+</div>
+
+</nav>
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; starrrry</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+      <li><a href="index.html">Home</a></li>
+      
+        <li class="divider"></li>
+        <li><label>YYModel笔记</label></li>
+
+          
+            <li><a title="YYModel笔记<一>" href="14683222736437.html">YYModel笔记<一></a></li>
+          
+            <li><a title="引用" href="14683222625946.html">引用</a></li>
+          
+
+      
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+        <section id="main-content" role="main" class="scroll-container">
+
+          <div class="row">
+            <div class="large-3 medium-3 columns">
+              <div class="hide-for-small">
+                <div class="sidebar">
+                <nav>
+                  <ul id="side-nav" class="side-nav">
+
+                    
+                      <li class="side-title"><span>YYModel笔记</span></li>
+                        
+                          <li><a title="YYModel笔记<一>" href="14683222736437.html">YYModel笔记<一></a></li>
+                        
+                          <li><a title="引用" href="14683222625946.html">引用</a></li>
+                        
+
+                    
+                  </ul>
+                </nav>
+                </div>
+              </div>
+            </div>
+            <div class="large-9 medium-9 columns">
+
+ 
+
+
+	
+		<div class="markdown-body">
+		<h1>YYModel笔记<一></h1>
+
+		<h2 id="toc_0">YYEncodingGetType</h2>
+
+<pre><code class="language-objc">YYEncodingType YYEncodingGetType(const char *typeEncoding);
+</code></pre>
+
+<p>这是一个C方法，我在Github上问了作者，这里使用C语言的原因是执行速度更快</p>
+
+<h2 id="toc_1">YYClassIvarInfo</h2>
+
+<p>看<code>YYClassIvarInfo</code>这个类，它包含了一个实例变量的多个信息</p>
+
+<pre><code class="language-objc">@interface YYClassIvarInfo : NSObject
+@property (nonatomic, assign, readonly) Ivar ivar;              ///&lt; ivar opaque struct 
+@property (nonatomic, strong, readonly) NSString *name;         ///&lt; Ivar&#39;s name
+@property (nonatomic, assign, readonly) ptrdiff_t offset;       ///&lt; Ivar&#39;s offset
+@property (nonatomic, strong, readonly) NSString *typeEncoding; ///&lt; Ivar&#39;s type encoding
+@property (nonatomic, assign, readonly) YYEncodingType type;    ///&lt; Ivar&#39;s type
+</code></pre>
+
+<h3 id="toc_2">Ivar ivar</h3>
+
+<p>Ivar是表示实例变量的类型，其实际是一个指向objc_ivar结构体的指针</p>
+
+<pre><code class="language-objc">typedef struct objc_ivar *Ivar;
+</code></pre>
+
+<p>其定义如下：</p>
+
+<pre><code class="language-objc">typedef struct objc_ivar *Ivar;
+
+struct objc_ivar {
+
+    char *ivar_name                 OBJC2_UNAVAILABLE;  // 变量名
+
+    char *ivar_type                 OBJC2_UNAVAILABLE;  // 变量类型
+
+    int ivar_offset                 OBJC2_UNAVAILABLE;  // 基地址偏移字节
+
+#ifdef __LP64__
+
+    int space                       OBJC2_UNAVAILABLE;
+
+#endif
+
+} 
+</code></pre>
+
+<p><code>ivar_offset</code>表示基地址偏移字节。在编译我们的类时，编译器生成了一个ivar布局，显示了在类中从哪可以访问我们的 ivars 。看下图:<br/>
+<img src="media/14683222736437/2014031602.png" alt="2014031602"/><br/>
+上图中，左侧的数据就是地址偏移字节，我们对 ivar 的访问就可以通过<code>对象地址 ＋ ivar偏移字节</code>的方法。但是这又引发一个问题，看下图:<br/>
+<img src="media/14683222736437/2014031603.png" alt="2014031603"/><br/>
+我们增加了父类的ivar，这个时候布局就出错了，我们就不得不重新编译子类来恢复兼容性。<br/>
+而Objective－C Runtime中使用了Non Fragile ivars，看下图:<br/>
+<img src="media/14683222736437/2014031604.png" alt="2014031604"/><br/>
+使用Non Fragile ivars时，Runtime会进行检测来调整类中新增的ivar的偏移量。 这样我们就可以通过<code>对象地址 ＋ 基类大小 + ivar偏移字节</code>的方法来计算出ivar相应的地址，并访问到相应的ivar。</p>
+
+<h3 id="toc_3">ptrdiff_t offset</h3>
+
+<p><code>ptrdiff_t</code>是C/C++标准库中定义的一个与机器相关的数据类型，通常用来保存两个指针减法操作的结果。<code>offset</code>即基地址偏移字节。</p>
+
+
+		</div>
+	
+
+ 
+	
+
+  
+  
+</div></div>
+
+
+<div class="page-bottom">
+  <div class="row">
+  <hr />
+  <div class="small-9 columns">
+  <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+  <div class="small-3 columns">
+  <p class="copyright text-right"><a href="#header">TOP</a></p>
+  </div>
+   
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+    
+    
+    <script src="asset/js/foundation.min.js"></script>
+    <script src="asset/js/foundation/foundation.offcanvas.js"></script>
+    <script>
+      $(document).foundation();
+
+     
+    </script>
+    
+
+
+  </body>
+</html>

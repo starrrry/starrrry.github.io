@@ -1,0 +1,238 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  图像与视频编码 - starrrry
+  
+  </title>
+ <meta name="description" content="starrrry">
+ <link href="atom.xml" rel="alternate" title="starrrry" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+    <script src="asset/highlightjs/highlight.pack.js"></script>
+    <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+<div id="header">
+    <h1><a href="index.html">starrrry</a></h1>
+</div>
+
+</nav>
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; starrrry</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+      <li><a href="index.html">Home</a></li>
+      
+        <li class="divider"></li>
+        <li><label>YYModel笔记</label></li>
+
+          
+            <li><a title="YYModel笔记<一>" href="14683222736437.html">YYModel笔记<一></a></li>
+          
+            <li><a title="引用" href="14683222625946.html">引用</a></li>
+          
+
+      
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+        <section id="main-content" role="main" class="scroll-container">
+
+          <div class="row">
+            <div class="large-3 medium-3 columns">
+              <div class="hide-for-small">
+                <div class="sidebar">
+                <nav>
+                  <ul id="side-nav" class="side-nav">
+
+                    
+                      <li class="side-title"><span>YYModel笔记</span></li>
+                        
+                          <li><a title="YYModel笔记<一>" href="14683222736437.html">YYModel笔记<一></a></li>
+                        
+                          <li><a title="引用" href="14683222625946.html">引用</a></li>
+                        
+
+                    
+                  </ul>
+                </nav>
+                </div>
+              </div>
+            </div>
+            <div class="large-9 medium-9 columns">
+
+ <div class="markdown-body">
+<h1>图像与视频编码</h1>
+
+<p>因为要做一个与视频相关的项目，以前很少具体了解图像视频相关的知识，也趁这个机会要求自己开始写博客。</p>
+
+<h2 id="toc_0">色彩模型，像素与位图</h2>
+
+<p>首先讲几个比较简单但以前自己都没有注意的概念。  </p>
+
+<h3 id="toc_1">色彩模型</h3>
+
+<p>色彩模型是描述使用一组值表示颜色方法的抽象数学模型。例如RGB（三原色光模型），CMYK（印刷四分色模型）。三原色光模型是将红（Red）、绿（Green）、蓝（Blue）三原色的色光以不同比例相加来表示颜色的一种模式，是一种加色模型。RGB的多少指亮度，三原色各有256级亮度，用0~255间的整数表示。因此当RGB的数值都为0时，亮度最低，为黑色；都为255时，亮度最大，为白色。关于色彩模型更详细的内容可以看这篇<a href="http://blog.ibireme.com/2013/08/12/color-model/" title="Title">ibireme-颜色模型</a>。</p>
+
+<h3 id="toc_2">像素</h3>
+
+<p>像素（pixel）是图像或视频显示的基本单位，这个定义也与上下文有关。当我们抽象地讨论一张图像，像素不是一个点或者一个方块，而是一个抽象的取样，如同一个二维矩阵，矩阵的每一个元素代表一个像素。如果把一张图像想象成紧密平铺在空地上的一片乒乓球，每一个乒乓球就像是一个像素。对于计算机中显示的通常讲的一张 100*100像素的彩色图像来说，它就是由10000个像素组成的，每一个像素有一组RGB值来表示这个像素的颜色。</p>
+
+<h3 id="toc_3">位图</h3>
+
+<p>而这样由像素阵列来表示的图像，就是位图（Bitmap），又称栅格图（Raster graphics）。<br/>
+位图的每个像素都分配有特定的位置与颜色信息。根据色彩深度（色彩位数），即用来表示每个像素点颜色的二进制位数，可以把图像分为1位（单色），2位（4色，CGA），4位（16色，VGA），8位（256色），16位（增强色），24位和32位（真彩色）。RGB加色模型由于每个颜色有256种取值，即24位/像素，因此用RGB模型表示颜色的位图称作24位图像。</p>
+
+<p><center><img src="http://o6yxlucxk.bkt.clouddn.com/Rgb-raster-image-hans.png" alt="MacDown Screenshot"/></center></p>
+
+<h3 id="toc_4">位图的显示</h3>
+
+<p>假如有一张100*100像素的图片显示在一个100*100像素的显示屏上，刚好一个像素信息对应屏幕上的一个像素点。而如果是显示在一个1000*1000像素的显示屏上，这张照片就不能铺满这个显示屏，只占据了一部分。我们可以拉伸这张图片，让其占据屏幕更大的部分，好像图片突然多出了一些像素。当我们在拉伸图片时，计算机会根据插值算法或其他特定算法，根据原有图片的像素信息，生成新的像素插到原来的图片中，让图片可以占据更大的面积。同样的，如果一张大分辨率图片放在一个小分辨率屏幕上时，要么只显示图片的一部分，要么删去图片一部分的像素，让图片所占面积缩小。</p>
+
+<h2 id="toc_5">图像编码与格式</h2>
+
+<p>图像编码即是对图像数据进行压缩，目的是减少图像数据中的冗余信息，从而用更高效的格式存储和传输数据。</p>
+
+<h3 id="toc_6">减少冗余信息</h3>
+
+<ul>
+<li>空间冗余：图像相邻像素之间有较强的相关性，因此可以通过编码减小数据量</li>
+<li>结构冗余：有些图像从大体看存在着非常强的纹理结构，例如草席图像。</li>
+<li>知识冗余：有许多图像的理解与某些基础知识有相当大的相关性。例如人脸的图像有固定的结构。这类规律性的结构可由先验知识和背景知识得到。</li>
+<li>视觉冗余：是由于人体器官的不敏感性造成的。某些人视觉无法感知的部分可以被压缩而不会影响感知。</li>
+<li>信息熵冗余：又可称为编码冗余，是指一组数据携带的平均信息量。</li>
+</ul>
+
+<h3 id="toc_7">图像压缩编码</h3>
+
+<p>图像压缩编码可分为两类</p>
+
+<ol>
+<li>一类压缩是可逆的，即从压缩后的数据可以 完全恢复到原来的图像，信息没有损失，称为无损压缩编码。</li>
+<li>另一类压缩是不可逆的，即从压缩后的数据无法完全恢复到原来的图像，信息有一定损失，称为有损压缩编码。</li>
+</ol>
+
+<h4 id="toc_8">常用无损压缩编码</h4>
+
+<ul>
+<li>BMP取自BitMaP的缩写，是一种与硬件设备无关的图像文件格式。它采用位映射存储格式，除了图像深度可选以外，不采用其他任何压缩。通常不适合在因特网或者其他低速或有容量限制的媒介上传输。</li>
+<li>GIF（Graphics Interchange Format）原意是“图像互换格式”。这是一种无损压缩格式，只要图像不多于256色，则可即减少文件的大小，又保持图像的质量。并且GIF可以插入多帧，从而实现动画效果。可设置透明色以产生对象浮现于背景之上的效果。但是由于采用了8为压缩，最多只能处理256种颜色，不宜应用于真彩色图片。是目前广泛应用于网络传输的图像格式之一。</li>
+<li>PNG（Portable Network Graphics）便携式网络图形，是一种无损压缩的位图图形格式。它最高支持48位真彩色图像以及16位灰度图像（每个像素只有一个采样颜色的图像），支持Alpha通道的透明/半透明特性，支持存储附加文本信息，以保留图像名称、作者、版权、创作时间、注释等信息。PNG的开发目标是改善并替换GIF作为适合网络传输的格式而不需专利许可，所以被广泛应用于互联网及其他方面上。我们在iOS开发中，icon就是使用PNG格式的图片。</li>
+</ul>
+
+<h4 id="toc_9">常用有损压缩编码</h4>
+
+<ul>
+<li>JPEG（Joint Photographic Experts Group，联合图像专家小组）是一种针对照片视频而广泛使用的有损压缩标准方法。JPEG的压缩方式通常是破坏性数据压缩，意即在压缩过程中图像的质量会遭受到可见的破坏。最普遍被使用的扩展名格式为.jpg，.jpeg等。</li>
+</ul>
+
+<h4 id="toc_10">视频压缩编码</h4>
+
+<pre><code>AVF_EXPORT NSString *const AVVideoCodecKey /* NSString (CMVideoCodecType) */                NS_AVAILABLE(10_7, 4_0);
+AVF_EXPORT NSString *const AVVideoCodecH264 /* @&quot;avc1&quot; */                               NS_AVAILABLE(10_7, 4_0);
+AVF_EXPORT NSString *const AVVideoCodecJPEG /* @&quot;jpeg&quot; */                               NS_AVAILABLE(10_7, 4_0);
+AVF_EXPORT NSString *const AVVideoCodecAppleProRes4444 /* @&quot;ap4h&quot; */                    NS_AVAILABLE(10_7, NA);
+AVF_EXPORT NSString *const AVVideoCodecAppleProRes422   /* @&quot;apcn&quot; */                   NS_AVAILABLE(10_7, NA);`
+</code></pre>
+
+<p>AVFoundation框架原生定义了这4种视频编码方式，其中主要使用的是H.264。<br/>
+H.264通过空间和时间2个维度来压缩：<br/>
+1. 空间：空间上的压缩独立于视频帧，也称为帧内压缩。主要通过压缩图片的方式来减小体积，帧内压缩一般为有损压缩。<br/>
+2. 时间：时间上的压缩也称为帧间压缩。视频是由连续的帧（图片）组成。一段视频中有很多不变的冗余元素，通过减小这些冗余元素来达到压缩目的，这就是帧间压缩，帧间压缩一般为无损压缩。</p>
+
+<p>H264有3种profile，用来确定编码过程中帧间压缩使用的算法：</p>
+
+<pre><code>AVF_EXPORT NSString *const AVVideoAllowFrameReorderingKey /* NSNumber (BOOL) */                          NS_AVAILABLE(10_10, 7_0);
+
+AVF_EXPORT NSString *const AVVideoProfileLevelKey /* NSString, H.264 only, one of: */                    NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Baseline30 /* Baseline Profile Level 3.0 */        NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Baseline31 /* Baseline Profile Level 3.1 */        NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Baseline41 /* Baseline Profile Level 4.1 */        NS_AVAILABLE(10_8, 5_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264BaselineAutoLevel /* Baseline Profile Auto Level */ NS_AVAILABLE(10_9, 7_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main30 /* Main Profile Level 3.0 */                NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main31 /* Main Profile Level 3.1 */                NS_AVAILABLE(10_8, 4_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main32 /* Main Profile Level 3.2 */                NS_AVAILABLE(10_8, 5_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264Main41 /* Main Profile Level 4.1 */                NS_AVAILABLE(10_8, 5_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264MainAutoLevel /* Main Profile Auto Level */        NS_AVAILABLE(10_9, 7_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264High40 /* High Profile Level 4.0 */                NS_AVAILABLE(10_9, 6_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264High41 /* High Profile Level 4.1 */                NS_AVAILABLE(10_9, 6_0);
+    AVF_EXPORT NSString *const AVVideoProfileLevelH264HighAutoLevel /* High Profile Auto Level */        NS_AVAILABLE(10_9, 7_0);
+</code></pre>
+
+<ol>
+<li>BaseLine：这个标准提供了最低效的压缩，经过这个标准压缩后的文件体积仍然比较大，但是这种算法计算强度最小。</li>
+<li>Main：这个标准的计算强度比BaseLine大，但能达到更高的压缩效果。</li>
+<li>High：这个标准能达到最高质量的压缩效果，但他的压缩算法最复杂。
+对应于<code>AVVideoProfileLevelKey</code>，每种profile的level越高，视频的码率、分辨率、fps越高。</li>
+</ol>
+
+<h2 id="toc_11">参考阅读</h2>
+
+<ul>
+<li><a href="https://zh.wikipedia.org/wiki/%E8%89%B2%E5%BD%A9%E7%A9%BA%E9%96%93">色彩空間</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%B8%89%E5%8E%9F%E8%89%B2%E5%85%89%E6%A8%A1%E5%BC%8F">三原色光模式</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E5%83%8F%E7%B4%A0">像素</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E4%BD%8D%E5%9B%BE">位图</a></li>
+<li><a href="http://wiki.mbalib.com/wiki/%E6%95%B0%E6%8D%AE%E5%86%97%E4%BD%99">数据冗余</a></li>
+</ul>
+
+
+</div>
+<br /><br /> 
+</div></div>
+
+
+<div class="page-bottom">
+  <div class="row">
+  <hr />
+  <div class="small-9 columns">
+  <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+  <div class="small-3 columns">
+  <p class="copyright text-right"><a href="#header">TOP</a></p>
+  </div>
+   
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+    
+    
+    <script src="asset/js/foundation.min.js"></script>
+    <script src="asset/js/foundation/foundation.offcanvas.js"></script>
+    <script>
+      $(document).foundation();
+
+     
+    </script>
+    
+
+
+  </body>
+</html>
