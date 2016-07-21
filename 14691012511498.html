@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  starrrry
+  clipsToBounds=YES与shadow如何共存 - starrrry
   
   </title>
  <meta name="description" content="starrrry">
@@ -107,14 +107,10 @@
             </div>
             <div class="large-9 medium-9 columns">
 
- 
+ <div class="markdown-body">
+<h1>clipsToBounds=YES与shadow如何共存</h1>
 
-
-	
-		<div class="markdown-body">
-		<h1>clipsToBounds=YES与shadow如何共存</h1>
-
-		<p>有时候我们需要用<code>view.clipsToBounds=YES</code>来裁剪图片防止图片显示的范围超出了<code>UIImageView</code>的大小，如果这个时候还需要给这个<code>UIImageView</code>加<code>shadow</code>的话，可能会遇到一些问题。</p>
+<p>有时候我们需要用<code>view.clipsToBounds=YES</code>来裁剪图片防止图片显示的范围超出了<code>UIImageView</code>的大小，如果这个时候还需要给这个<code>UIImageView</code>加<code>shadow</code>的话，可能会遇到一些问题。</p>
 
 <pre><code class="language-objc">UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(100, 100, 100, 100)];
     imageView.image = [UIImage imageNamed:@&quot;1.jpg&quot;];
@@ -151,17 +147,57 @@
 这种办法并不优雅，然而并不知道还有什么解决的办法。</p>
 
 
-		</div>
-	
+</div>
 
- 
-	
+<br /><br />
+<hr />
 
- 
-	
+<div class="row clearfix">
+  <div class="large-6 columns">
+	<div class="text-left" style="padding:15px 0px;">
+		
+	</div>
+  </div>
+  <div class="large-6 columns">
+	<div class="text-right" style="padding:15px 0px;">
+		
+	        <a href="14683222736437.html" 
+	        title="Next Post: YYModel笔记<一>">YYModel笔记<一> &raquo;</a>
+	    
+	</div>
+  </div>
+</div>
 
-  
-  
+<div class="row">
+<div style="padding:0px 0.93em;" class="share-comments">
+<!-- 多说评论框 start -->
+	<div class="ds-thread"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"starrrry"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+</div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		var currentURL = '14691012511498.html';
+		$('#side-nav a').each(function(){
+			if($(this).attr('href') == currentURL){
+				$(this).parent().addClass('active');
+			}
+		});
+	});
+</script>  
 </div></div>
 
 
