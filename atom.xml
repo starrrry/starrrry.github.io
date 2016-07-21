@@ -4,7 +4,7 @@
   <title><![CDATA[starrrry]]></title>
   <link href="starrrry.github.io/atom.xml" rel="self"/>
   <link href="starrrry.github.io/"/>
-  <updated>2016-07-19T10:10:19+08:00</updated>
+  <updated>2016-07-21T10:13:47+08:00</updated>
   <id>starrrry.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -19,12 +19,12 @@
     <updated>2016-07-12T19:17:53+08:00</updated>
     <id>starrrry.github.io/14683222736437.html</id>
     <content type="html"><![CDATA[
+<p>YYModel加上.h一共只有5个文件，非常简洁。大概浏览一下之后，我决定从<code>YYClassInfo</code>这个类开始看。</p>
+
 <h2 id="toc_0">YYEncodingGetType</h2>
 
-<pre><code class="language-objc">YYEncodingType YYEncodingGetType(const char *typeEncoding);
-</code></pre>
-
-<p>这是一个C方法，我在Github上问了作者，这里使用C语言的原因是执行速度更快</p>
+<p>这是一个C方法，我在Github上问了作者，这里使用C语言的原因是执行速度更快，而这个方法调用次数非常高。<br/>
+方法本身比较简单，看一下注释里的两个链接<a href="https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html">Type Encodings</a>和<a href="https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtPropertyIntrospection.html">Declared Properties</a>里的内容就可以理解了。</p>
 
 <h2 id="toc_1">YYClassIvarInfo</h2>
 
@@ -351,7 +351,12 @@ struct objc_ivar {
 }
 </code></pre>
 
-<h2 id="toc_10">参考</h2>
+<h2 id="toc_10">总结</h2>
+
+<p>YYClassInfo类的主要功能是由类获取类的信息，实例变量列表，属性列表，方法列表等。从这个类中可以看到实例变量的组成，实例变量，<code>get</code>方法，<code>set</code>方法，属性特质等构成属性，实例变量列表，属性列表，方法列表等又组合成一个类，从底层看到了一个类的基本组成。其中的运算涉及到了很多<code>runtime</code>的内容，很多平时写业务代码不会涉及到的方法，但是这些方法和相关的内容对于理解类、属性、实例变量、方法等都很有帮助。<br/>
+到目前，只是知道了如何从一个类获取其中包含的信息，对于Model与JSON的转化还没有涉及到，接下来的内容主要就是对<code>NSObject+YYModel</code>的理解分析类。</p>
+
+<h2 id="toc_11">参考</h2>
 
 <ol>
 <li><a href="http://southpeak.github.io/blog/2014/10/30/objective-c-runtime-yun-xing-shi-zhi-er-:cheng-yuan-bian-liang-yu-shu-xing/">关于成员变量和属性</a></li>
