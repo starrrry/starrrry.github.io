@@ -63,6 +63,8 @@
         <li><label>小记</label></li>
 
           
+            <li><a title="UIGestureRecognizerDelegate" href="14696974131837.html">UIGestureRecognizerDelegate</a></li>
+          
             <li><a title="clipsToBounds=YES与shadow如何共存" href="14691012511498.html">clipsToBounds=YES与shadow如何共存</a></li>
           
 
@@ -96,6 +98,8 @@
                     
                       <li class="side-title"><span>小记</span></li>
                         
+                          <li><a title="UIGestureRecognizerDelegate" href="14696974131837.html">UIGestureRecognizerDelegate</a></li>
+                        
                           <li><a title="clipsToBounds=YES与shadow如何共存" href="14691012511498.html">clipsToBounds=YES与shadow如何共存</a></li>
                         
 
@@ -112,46 +116,14 @@
 
 	
 		<div class="markdown-body">
-		<h1>clipsToBounds=YES与shadow如何共存</h1>
+		<h1>UIGestureRecognizerDelegate</h1>
 
-		<p>有时候我们需要用<code>view.clipsToBounds=YES</code>来裁剪图片防止图片显示的范围超出了<code>UIImageView</code>的大小，如果这个时候还需要给这个<code>UIImageView</code>加<code>shadow</code>的话，可能会遇到一些问题。</p>
-
-<pre><code class="language-objc">UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(100, 100, 100, 100)];
-    imageView.image = [UIImage imageNamed:@&quot;1.jpg&quot;];
-    imageView.contentMode=UIViewContentModeScaleAspectFill;
-    imageView.layer.shadowColor = [UIColor blackColor].CGColor;
-    imageView.layer.shadowOffset = CGSizeMake(10, 10);
-    imageView.layer.shadowRadius = 10;
-    imageView.layer.shadowOpacity = 1.0;
-    imageView.clipsToBounds = YES;
-    [self.view addSubview:imageView];
-</code></pre>
-
-<p>这个时候显示的就是<br/>
-<img src="media/14691012511498/QQ20160721-0@2x.png" alt="QQ20160721-0@2x " style="width:300px;"/><br/>
-<code>UIImageView</code>并没有出现<code>shadow</code>，这是因为当我们设置<code>clipsToBounds</code>为<code>YES</code>时，这个视图和其子视图的内容超出其<code>bounds</code>的部分都会被裁剪掉。而<code>shadow</code>是在视图的<code>bounds</code>之外的。因此这样设置是看不到<code>shadow</code>的。<br/>
-换一种方式</p>
-
-<pre><code class="language-objc">    UIView *shadowView = [[UIView alloc] initWithFrame:CGRectMake(100, 100, 200, 200)];
-    shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
-    shadowView.layer.shadowOffset = CGSizeMake(5, 5);
-    shadowView.layer.shadowRadius = 5;
-    shadowView.layer.shadowOpacity = 1.0;
-    UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 200, 200)];
-    imageView.image = [UIImage imageNamed:@&quot;1.jpg&quot;];
-    imageView.contentMode=UIViewContentModeScaleAspectFill;
-    imageView.clipsToBounds = YES;
-    [shadowView addSubview:imageView];
-    [self.view addSubview:shadowView];
-</code></pre>
-
-<p><img src="media/14691012511498/QQ20160721-1@2x.png" alt="QQ20160721-1@2x " style="width:300px;"/></p>
-
-<p>我们创建一个专门用来产生<code>shadow</code>的视图，将<code>UIImageView</code>加到这个视图上，由于<code>imageView</code>是<code>shadowView</code>的子视图，在<code>imageView</code>上设置<code>clipsToBounds</code>为<code>YES</code>并不会影响到<code>shadowView</code>。<br/>
-这种办法并不优雅，然而并不知道还有什么解决的办法。</p>
-
+		
 
 		</div>
+	
+
+ 
 	
 
   

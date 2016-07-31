@@ -63,6 +63,8 @@
         <li><label>小记</label></li>
 
           
+            <li><a title="UIGestureRecognizerDelegate" href="14696974131837.html">UIGestureRecognizerDelegate</a></li>
+          
             <li><a title="clipsToBounds=YES与shadow如何共存" href="14691012511498.html">clipsToBounds=YES与shadow如何共存</a></li>
           
 
@@ -95,6 +97,8 @@
 
                     
                       <li class="side-title"><span>小记</span></li>
+                        
+                          <li><a title="UIGestureRecognizerDelegate" href="14696974131837.html">UIGestureRecognizerDelegate</a></li>
                         
                           <li><a title="clipsToBounds=YES与shadow如何共存" href="14691012511498.html">clipsToBounds=YES与shadow如何共存</a></li>
                         
@@ -351,8 +355,28 @@ struct objc_ivar {
 
 <h2 id="toc_9">YYClassInfo</h2>
 
-<p>//OC2.0上的配图<br/>
-使用以下方法进行<code>YYClassInfo</code>的初始化：</p>
+<p>先看一下<code>objc_class</code>的结构</p>
+
+<pre><code class="language-objc">typedef struct objc_class *Class;
+struct objc_class {
+    Class isa;
+    Class super_class;
+    const char *name;
+    long version;
+    long info;
+    long instance_size;
+    struct objc_ivar_list *ivars;
+    struct objc_method_list **methodLists;
+    struct objc_cache *cache;
+    struct objc_protocol_list *protocols;
+};
+</code></pre>
+
+<p>此结构体存放类的“元数据”（metadata），例如类的实例实现了几个方法，具备多少个实例变量等信息。类对象所属的类型（也就是isa指针所指向的类型）是另一个类，叫做“元类”（metaclass），用来表述类对象本身所具备的元数据。<code>super_class</code>定义了本类的超类。最后四个结构体从名字可以看出其代表的意义。<code>objc_cache</code>是类的方法缓存，指向最近使用的方法，用于方法调用的优化。<br/>
+下图表示了<code>SomeClass</code>实例所属的“类继承体系”，此类集成自<code>NSObjct</code>。<code>super_class</code>指针确立了继承关系，而<code>isa</code>指针描述了实例所属的类。<br/>
+<img src="media/14683222736437/%E5%B1%8F%E5%B9%95%E5%BF%AB%E7%85%A7%202016-07-30%20%E4%B8%8B%E5%8D%886.26.16.png" alt="屏幕快照 2016-07-30 下午6.26.16"/></p>
+
+<p>使用以下方法进行<code>YYClassInfo</code>的初始化：</p>
 
 <pre><code class="language-objc">+ (instancetype)classInfoWithClass:(Class)cls {
     if (!cls) return nil;
@@ -465,15 +489,13 @@ struct objc_ivar {
   <div class="large-6 columns">
 	<div class="text-left" style="padding:15px 0px;">
 		
-	        <a href="14691012511498.html"  title="Previous Post: clipsToBounds=YES与shadow如何共存">&laquo; clipsToBounds=YES与shadow如何共存</a>
-	    
 	</div>
   </div>
   <div class="large-6 columns">
 	<div class="text-right" style="padding:15px 0px;">
 		
-	        <a href="14688942051696.html" 
-	        title="Next Post: 图像与视频编码">图像与视频编码 &raquo;</a>
+	        <a href="14696974131837.html" 
+	        title="Next Post: UIGestureRecognizerDelegate">UIGestureRecognizerDelegate &raquo;</a>
 	    
 	</div>
   </div>
