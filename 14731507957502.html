@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  UIGestureRecognizerDelegate - starrrry
+  队列（Queue）与线程（Thread）的关系 - starrrry
   
   </title>
  <meta name="description" content="starrrry">
@@ -63,7 +63,9 @@
         <li><label>小记</label></li>
 
           
-            <li><a title="UIGestureRecognizerDelegate" href="14696974131837.html">UIGestureRecognizerDelegate</a></li>
+            <li><a title="队列（Queue）与线程（Thread）的关系" href="14731507957502.html">队列（Queue）与线程（Thread）的关系</a></li>
+          
+            <li><a title="[NSMutableArray array]与[[NSMutableArray alloc] init]" href="14725452750439.html">[NSMutableArray array]与[[NSMutableArray alloc] init]</a></li>
           
             <li><a title="clipsToBounds=YES与shadow如何共存" href="14691012511498.html">clipsToBounds=YES与shadow如何共存</a></li>
           
@@ -98,7 +100,9 @@
                     
                       <li class="side-title"><span>小记</span></li>
                         
-                          <li><a title="UIGestureRecognizerDelegate" href="14696974131837.html">UIGestureRecognizerDelegate</a></li>
+                          <li><a title="队列（Queue）与线程（Thread）的关系" href="14731507957502.html">队列（Queue）与线程（Thread）的关系</a></li>
+                        
+                          <li><a title="[NSMutableArray array]与[[NSMutableArray alloc] init]" href="14725452750439.html">[NSMutableArray array]与[[NSMutableArray alloc] init]</a></li>
                         
                           <li><a title="clipsToBounds=YES与shadow如何共存" href="14691012511498.html">clipsToBounds=YES与shadow如何共存</a></li>
                         
@@ -112,8 +116,12 @@
             <div class="large-9 medium-9 columns">
 
  <div class="markdown-body">
-<h1>UIGestureRecognizerDelegate</h1>
+<h1>队列（Queue）与线程（Thread）的关系</h1>
 
+<p>一个队列由一个或多个任务组成，当这些任务要开始执行时，系统会分别把他们分配到某个线程上去执行。当有多个系统核心时，为了高效运行，这些核心会将多个线程分配到各核心上去执行任务，对于系统核心来说并没有任务的概念。<br/>
+对于一个并行队列来说，其中的任务可能被分配到多个线程中去执行，即这个并行队列可能对应多个线程。对于串行队列，它每次对应一个线程，这个线程可能不变，可能会被更换。<br/>
+每一时刻，一个线程都只能执行一个任务。一个线程也可能是闲置或者挂起的，因此线程存在时不一定就在执行任务。<br/>
+队列和线程可以说是两个层级的概念。队列是为了方便使用和理解的抽象结构，而线程是系统级的进行运算调度的单位，他们是上下层级之间的关系。</p>
 
 
 </div>
@@ -125,15 +133,13 @@
   <div class="large-6 columns">
 	<div class="text-left" style="padding:15px 0px;">
 		
-	        <a href="14683222736437.html"  title="Previous Post: YYModel笔记<一>">&laquo; YYModel笔记<一></a>
-	    
 	</div>
   </div>
   <div class="large-6 columns">
 	<div class="text-right" style="padding:15px 0px;">
 		
-	        <a href="14691012511498.html" 
-	        title="Next Post: clipsToBounds=YES与shadow如何共存">clipsToBounds=YES与shadow如何共存 &raquo;</a>
+	        <a href="14725452750439.html" 
+	        title="Next Post: [NSMutableArray array]与[[NSMutableArray alloc] init]">[NSMutableArray array]与[[NSMutableArray alloc] init] &raquo;</a>
 	    
 	</div>
   </div>
@@ -161,7 +167,7 @@ var duoshuoQuery = {short_name:"starrrry"};
 </div>
 <script type="text/javascript">
 	$(function(){
-		var currentURL = '14696974131837.html';
+		var currentURL = '14731507957502.html';
 		$('#side-nav a').each(function(){
 			if($(this).attr('href') == currentURL){
 				$(this).parent().addClass('active');

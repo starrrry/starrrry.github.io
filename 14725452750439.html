@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
     
-  小记 - starrrry
+  [NSMutableArray array]与[[NSMutableArray alloc] init] - starrrry
   
   </title>
  <meta name="description" content="starrrry">
@@ -115,30 +115,75 @@
             </div>
             <div class="large-9 medium-9 columns">
 
- 
+ <div class="markdown-body">
+<h1>[NSMutableArray array]与[[NSMutableArray alloc] init]</h1>
+
+<p>初始化一个<code>NSMutableArray</code>时，可以使用<code>[NSMutableArray array]</code>，<code>[[NSMutableArray alloc] init]</code>或者<code>[NSMutableArray new]</code>等。<br/>
+使用<code>[[NSMutableArray alloc] init]</code>或者<code>[NSMutableArray new]</code>进行初始化时，都会自己生成并持有对象。当不再需要这个对象时，需要自己释放这个对象调用<code>release</code>。<br/>
+而使用<code>[NSMutableArray array]</code>初始化方法时，可以取得对象，但这个对象不是自己生成的也不持有。如果需要持有，需要调用<code>retain</code>。实际上，调用<code>[NSMutableArray array]</code>相当于</p>
+
+<pre><code class="language-objc">id array = [[NSMutableArray alloc] init];
+[array autorelease];
+</code></pre>
+
+<p>这样可以取得对象，但并不持有。所以我们也不需要考虑在不需要这个对象时调用<code>release</code>来释放对象。因为<code>autorelease</code>的效果，对象在超出指定的生存范围时能够自动并正确地释放。</p>
+
+<p>在使用ARC时，两者没有什么差别。</p>
 
 
-	
-		<div class="markdown-body">
-		<h1>队列（Queue）与线程（Thread）的关系</h1>
+</div>
 
-		<p>一个队列由一个或多个任务组成，当这些任务要开始执行时，系统会分别把他们分配到某个线程上去执行。当有多个系统核心时，为了高效运行，这些核心会将多个线程分配到各核心上去执行任务，对于系统核心来说并没有任务的概念。<br/>
-对于一个并行队列来说，其中的任务可能被分配到多个线程中去执行，即这个并行队列可能对应多个线程。对于串行队列，它每次对应一个线程，这个线程可能不变，可能会被更换。<br/>
-每一时刻，一个线程都只能执行一个任务。一个线程也可能是闲置或者挂起的，因此线程存在时不一定就在执行任务。<br/>
-队列和线程可以说是两个层级的概念。队列是为了方便使用和理解的抽象结构，而线程是系统级的进行运算调度的单位，他们是上下层级之间的关系。</p>
+<br /><br />
+<hr />
 
+<div class="row clearfix">
+  <div class="large-6 columns">
+	<div class="text-left" style="padding:15px 0px;">
+		
+	        <a href="14731507957502.html"  title="Previous Post: 队列（Queue）与线程（Thread）的关系">&laquo; 队列（Queue）与线程（Thread）的关系</a>
+	    
+	</div>
+  </div>
+  <div class="large-6 columns">
+	<div class="text-right" style="padding:15px 0px;">
+		
+	        <a href="14683222736437.html" 
+	        title="Next Post: YYModel笔记<一>">YYModel笔记<一> &raquo;</a>
+	    
+	</div>
+  </div>
+</div>
 
-		</div>
-	
-
- 
-	
-
- 
-	
-
-  
-  
+<div class="row">
+<div style="padding:0px 0.93em;" class="share-comments">
+<!-- 多说评论框 start -->
+	<div class="ds-thread"></div>
+<!-- 多说评论框 end -->
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"starrrry"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+<!-- 多说公共JS代码 end -->
+</div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		var currentURL = '14725452750439.html';
+		$('#side-nav a').each(function(){
+			if($(this).attr('href') == currentURL){
+				$(this).parent().addClass('active');
+			}
+		});
+	});
+</script>  
 </div></div>
 
 

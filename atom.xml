@@ -4,7 +4,7 @@
   <title><![CDATA[starrrry]]></title>
   <link href="starrrry.github.io/atom.xml" rel="self"/>
   <link href="starrrry.github.io/"/>
-  <updated>2016-07-21T20:10:35+08:00</updated>
+  <updated>2016-07-31T23:59:48+08:00</updated>
   <id>starrrry.github.io/</id>
   <author>
     <name><![CDATA[]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://www.mweb.im">MWeb</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[队列（Queue）与线程（Thread）的关系]]></title>
+    <link href="starrrry.github.io/14731507957502.html"/>
+    <updated>2016-09-06T16:33:15+08:00</updated>
+    <id>starrrry.github.io/14731507957502.html</id>
+    <content type="html"><![CDATA[
+<p>一个队列由一个或多个任务组成，当这些任务要开始执行时，系统会分别把他们分配到某个线程上去执行。当有多个系统核心时，为了高效运行，这些核心会将多个线程分配到各核心上去执行任务，对于系统核心来说并没有任务的概念。<br/>
+对于一个并行队列来说，其中的任务可能被分配到多个线程中去执行，即这个并行队列可能对应多个线程。对于串行队列，它每次对应一个线程，这个线程可能不变，可能会被更换。<br/>
+每一时刻，一个线程都只能执行一个任务。一个线程也可能是闲置或者挂起的，因此线程存在时不一定就在执行任务。<br/>
+队列和线程可以说是两个层级的概念。队列是为了方便使用和理解的抽象结构，而线程是系统级的进行运算调度的单位，他们是上下层级之间的关系。</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[[NSMutableArray array]与[[NSMutableArray alloc] init]]]></title>
+    <link href="starrrry.github.io/14725452750439.html"/>
+    <updated>2016-08-30T16:21:15+08:00</updated>
+    <id>starrrry.github.io/14725452750439.html</id>
+    <content type="html"><![CDATA[
+<p>初始化一个<code>NSMutableArray</code>时，可以使用<code>[NSMutableArray array]</code>，<code>[[NSMutableArray alloc] init]</code>或者<code>[NSMutableArray new]</code>等。<br/>
+使用<code>[[NSMutableArray alloc] init]</code>或者<code>[NSMutableArray new]</code>进行初始化时，都会自己生成并持有对象。当不再需要这个对象时，需要自己释放这个对象调用<code>release</code>。<br/>
+而使用<code>[NSMutableArray array]</code>初始化方法时，可以取得对象，但这个对象不是自己生成的也不持有。如果需要持有，需要调用<code>retain</code>。实际上，调用<code>[NSMutableArray array]</code>相当于</p>
+
+<pre><code class="language-objc">id array = [[NSMutableArray alloc] init];
+[array autorelease];
+</code></pre>
+
+<p>这样可以取得对象，但并不持有。所以我们也不需要考虑在不需要这个对象时调用<code>release</code>来释放对象。因为<code>autorelease</code>的效果，对象在超出指定的生存范围时能够自动并正确地释放。</p>
+
+<p>在使用ARC时，两者没有什么差别。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[YYModel笔记<一>]]></title>
@@ -383,16 +418,6 @@ struct objc_class {
 <li><a href="http://chun.tips/blog/2014/11/08/bao-gen-wen-di-objective%5Bnil%5Dc-runtime(4)%5Bnil%5D-cheng-yuan-bian-liang-yu-shu-xing/">ivar的偏移量问题</a></li>
 <li><a href="http://southpeak.github.io/blog/2014/11/03/objective-c-runtime-yun-xing-shi-zhi-san-:fang-fa-yu-xiao-xi-zhuan-fa/">关于SEL和IMP</a></li>
 </ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[UIGestureRecognizerDelegate]]></title>
-    <link href="starrrry.github.io/14696974131837.html"/>
-    <updated>2016-07-28T17:16:53+08:00</updated>
-    <id>starrrry.github.io/14696974131837.html</id>
-    <content type="html"><![CDATA[
 
 ]]></content>
   </entry>
